@@ -1,18 +1,18 @@
 {
 	"schemaVersion": 1,
-	"id": "experience-gatling-gun",
+	"id": "egg",
 	"version": "${version}",
 	"name": "Experience Gatling Gun",
 	"description": "A simple mod that adds a new weapon to the game: the Experience Gatling Gun.",
 	"authors": [
-		"VTK"
+		"VTK", "Kensufox"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/experience-gatling-gun/icon.png",
+	"icon": "assets/egg/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -25,17 +25,16 @@
 			"com.egg.client.ExperienceGatlingGunDataGenerator"
 		]
 	},
-	"mixins": [
-		"experience-gatling-gun.mixins.json",
-		{
-			"config": "experience-gatling-gun.client.mixins.json",
-			"environment": "client"
-		}
-	],
-	"depends": {
-		"fabricloader": ">=0.19.3",
-		"minecraft": "~1.21.1",
-		"java": ">=21",
-		"fabric-api": "*"
-	}
+    "mixins": [
+      "egg.mixins.json"
+    ],
+    "depends": {
+      "fabricloader": ">=0.18.2",
+      "minecraft": "~1.21.1",
+      "java": ">=21",
+      "fabric-api": "*"
+    },
+    "suggests": {
+      "another-mod": "*"
+    }
 }
