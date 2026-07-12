@@ -8,12 +8,6 @@ import static net.minecraft.item.Items.register;
 
 public class ModItems {
 
-    //public static Item register(Item item, String id) {
-    //    ResourceLocation itemID = ResourceLocation.fromNamespaceAndPath(ExperienceGatlingGun.MOD_ID, id);
-    //
-    //    return Registry.register(BuiltInRegistries.ITEM, itemID, item);
-    //}
-
     public static final Item EXPERIENCE_GATLING_GUN = register("experience_gatling_gun",
             new ExperienceGatlingGunItem(new Item.Settings().maxCount(1)));
 
@@ -27,9 +21,4 @@ public class ModItems {
     public static void registerItems() {
         ExperienceGatlingGun.LOGGER.info("Registering items for " + ExperienceGatlingGun.MOD_ID);
     }
-
-
-    //public static void initialize() {
-    //    register(new ExperienceGatlingGunItem(new Item.Properties().stacksTo(1)), "experience-gatling-gun");
-    //}
 }

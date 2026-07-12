@@ -19,7 +19,7 @@ public class ExperienceGatlingGunItem extends Item {
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity entity) { // ⚠️ VÉRIFIER: signature exacte (avec/sans LivingEntity)
+    public int getMaxUseTime(ItemStack stack, LivingEntity entity) {
         return 72000;
     }
 
@@ -33,9 +33,9 @@ public class ExperienceGatlingGunItem extends Item {
     public void usageTick(World world, LivingEntity livingEntity, ItemStack stack, int remainingUseTicks) {
         if (livingEntity instanceof PlayerEntity player) {
 
-            int count = stack.getMaxUseTime(player) - remainingUseTicks; // reconstitue le "count" croissant
+            int count = stack.getMaxUseTime(player) - remainingUseTicks;
             if (count % 2 == 0) {
-                boolean isCreative = player.getAbilities().creativeMode; // ⚠️ VÉRIFIER: nom du champ
+                boolean isCreative = player.getAbilities().creativeMode;
 
                 if (isCreative || player.totalExperience > 0) {
 
@@ -46,7 +46,7 @@ public class ExperienceGatlingGunItem extends Item {
                     if (!world.isClient()) {
                         ExperienceAmmoEntity projectile = new ExperienceAmmoEntity(world, player);
 
-                        Vec3d look = player.getRotationVector(); // ⚠️ VÉRIFIER: nom possible aussi getLookAngle/getOculusAngle selon version
+                        Vec3d look = player.getRotationVector();
 
                         double spawnX = player.getX() + (look.x * 1.6);
                         double spawnY = player.getEyeY() - 2 + (look.y * 1.2);
