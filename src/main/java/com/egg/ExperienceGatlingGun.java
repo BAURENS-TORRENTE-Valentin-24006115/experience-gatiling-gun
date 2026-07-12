@@ -1,6 +1,8 @@
 package com.egg;
 
 import com.egg.entity.ExperienceAmmoEntity;
+import com.egg.item.ModDataComponents;
+import com.egg.item.ModEventHandlers;
 import com.egg.item.ModItemGroups;
 import com.egg.item.ModItems;
 import net.fabricmc.api.ModInitializer;
@@ -31,6 +33,8 @@ public class ExperienceGatlingGun implements ModInitializer {
         LOGGER.info("Initializing Experience Gatling GUN!");
         ModItems.registerItems();
         ModItemGroups.registerItemGroups();
+        ModDataComponents.register();
+        ModEventHandlers.register();
     }
 
     public static Identifier id(String path) {

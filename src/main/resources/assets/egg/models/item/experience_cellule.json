@@ -2,5 +2,11 @@
   "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "egg:item/experience_cellule0"
-  }
+  },
+  "overrides": [
+    { "predicate": { "custom_model_data": 1 }, "model": "egg:item/experience_cellule1" },
+    { "predicate": { "custom_model_data": 2 }, "model": "egg:item/experience_cellule2" },
+    { "predicate": { "custom_model_data": 3 }, "model": "egg:item/experience_cellule3" },
+    { "predicate": { "custom_model_data": 4 }, "model": "egg:item/experience_cellule4" }
+  ]
 }
