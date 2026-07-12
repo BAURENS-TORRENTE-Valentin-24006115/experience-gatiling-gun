@@ -23,7 +23,7 @@ public class ExperienceAmmoEntity extends ThrownItemEntity {
     }
 
     @Override
-    protected boolean canHit(Entity target) { // ⚠️ VÉRIFIER: peut aussi s'appeler canHitEntity selon la version
+    protected boolean canHit(Entity target) {
         if (target == this.getOwner()) {
             return false;
         }
@@ -44,12 +44,11 @@ public class ExperienceAmmoEntity extends ThrownItemEntity {
 
         Entity target = result.getEntity();
 
-        // ⚠️ VÉRIFIER: signature de damage() a pu changer (ServerWorld en 1er paramètre selon version)
         target.damage(this.getWorld().getDamageSources().thrown(this, this.getOwner()), 4.0F);
     }
 
     @Override
-    protected void onCollision(HitResult result) { // ⚠️ VÉRIFIER: nom possible aussi "onHit"
+    protected void onCollision(HitResult result) {
         super.onCollision(result);
 
         if (!this.getWorld().isClient) {
