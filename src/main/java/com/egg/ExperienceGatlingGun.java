@@ -1,5 +1,6 @@
 package com.egg;
 
+import com.egg.block.ModBlocks;
 import com.egg.entity.ExperienceAmmoEntity;
 import com.egg.item.ModDataComponents;
 import com.egg.item.ModEventHandlers;
@@ -31,6 +32,7 @@ public class ExperienceGatlingGun implements ModInitializer {
     @Override
     public void onInitialize() {
         LOGGER.info("Initializing Experience Gatling GUN!");
+        ModBlocks.registerBlocks();
         ModItems.registerItems();
         ModItemGroups.registerItemGroups();
         ModDataComponents.register();
