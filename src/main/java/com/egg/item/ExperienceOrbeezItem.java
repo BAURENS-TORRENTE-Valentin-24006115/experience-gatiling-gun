@@ -1,5 +1,6 @@
 package com.egg.item;
 
+import com.egg.ExperienceGlobalData;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -38,7 +39,7 @@ public class ExperienceOrbeezItem extends Item {
                 if (player.isSneaking()) {
                     player.addExperience(stack.getCount());
                     for (int i = 0; i <= Math.min(10, stack.getCount()); i++) {
-                        playXpSound(world, player);
+                        ExperienceGlobalData.playXpSound(world, player);
                     }
                     if (!player.isCreative()) {
                         stack.decrement(stack.getCount());
@@ -52,7 +53,7 @@ public class ExperienceOrbeezItem extends Item {
                     player.addExperience(1);
 
                     if (count % 2 == 0) {
-                        playXpSound(world, player);
+                        ExperienceGlobalData.playXpSound(world, player);
                     }
 
                     if (!player.isCreative()) {
@@ -65,13 +66,6 @@ public class ExperienceOrbeezItem extends Item {
             }
 
         }
-    }
-
-    public static void playXpSound(World world, PlayerEntity player){
-        float pitch = 0.5F * ((world.random.nextFloat() - world.random.nextFloat()) * 0.7F + 1.8F);
-        world.playSound(null, player.getBlockPos(),
-                SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP,
-                SoundCategory.PLAYERS, 0.1F, pitch);
     }
 
     @Override

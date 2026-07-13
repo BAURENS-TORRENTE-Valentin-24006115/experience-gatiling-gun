@@ -1,5 +1,6 @@
 package com.egg.item;
 
+import com.egg.ExperienceGlobalData;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.player.PlayerEntity;
@@ -74,19 +75,10 @@ public class ExperienceCelluleItem extends Item{
         int currentXp = getStoredXp(celluleStack);
         if (currentXp >= MAX_XP) return false;
 
-        int xpPerUnit;
-        if (source.getItem() instanceof ExperienceOrbeezItem) {
-            xpPerUnit = 1;
-        } else if (source.isOf(Items.EXPERIENCE_BOTTLE)) {
-            xpPerUnit = 3 + world.random.nextInt(5) + world.random.nextInt(5);
-        } else {
-            return false;
-        }
-
         int spaceLeft = MAX_XP - currentXp;
         if (spaceLeft <= 0) return false;
 
-        int newXp = currentXp + Math.min(xpPerUnit, spaceLeft);
+        int newXp = currentXp + Math.min(ExperienceGlobalData.getXpValue(world, source), spaceLeft);
 
         if (celluleStack.getCount() == 1) {
             setStoredXp(celluleStack, newXp);
@@ -103,7 +95,7 @@ public class ExperienceCelluleItem extends Item{
             source.decrement(1);
         }
         if (!world.isClient()) {
-            ExperienceOrbeezItem.playXpSound(world, player);
+            ExperienceGlobalData.playXpSound(world, player);
         }
         return true;
     }
