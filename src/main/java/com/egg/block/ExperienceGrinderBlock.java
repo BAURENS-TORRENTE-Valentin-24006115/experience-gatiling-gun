@@ -14,6 +14,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -31,6 +34,10 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
 
     public static final int GRIND_TICK_MAX_DELAY = 5;
     public static final int GRINDER_DAMAGE = 2;
+
+    public static final int XP_TICK_INTERVAL = 120;
+    public static final int XP_COST_NO_ENTITY = 1;
+    public static final int XP_COST_WITH_ENTITY = 5;
 
     public ExperienceGrinderBlock(AbstractBlock.Settings settings) {
         super(settings);
@@ -98,14 +105,68 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
         return false;
     }
 
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        if (world.isClient()) return null;
+        if (type != ModBlockEntities.EXPERIENCE_GRINDER) return null;
+
+        return (world1, pos, state1, blockEntity) -> tick(world1, pos, state1, (ExperienceGrinderBlockEntity) blockEntity);
+    }
+
+    public static void tick(World world, BlockPos pos, BlockState state, ExperienceGrinderBlockEntity blockEntity) {
+        if (!(state.getBlock() instanceof ExperienceGrinderBlock block)) return;
+        if (!block.isActive(blockEntity, world, pos)) return;
+
+        if (blockEntity.getXpConsumeTickDelay() < XP_TICK_INTERVAL) {
+            blockEntity.incrementXpConsumeTickDelay();
+            return;
+        }
+
+        boolean hasEntity = block.hasLivingEntityOnTop(world, pos);
+        int cost = hasEntity ? XP_COST_WITH_ENTITY : XP_COST_NO_ENTITY;
+
+        block.consumeXp(blockEntity, cost);
+        blockEntity.resetXpConsumeTickDelay();
+    }
+
+    private boolean hasLivingEntityOnTop(World world, BlockPos pos) {
+        Box box = new Box(pos).stretch(0, 1, 0);
+        return !world.getEntitiesByClass(LivingEntity.class, box, entity -> true).isEmpty();
+    }
+
+    public void consumeXp(ExperienceGrinderBlockEntity blockEntity, int cost) {
+        int cell1 = blockEntity.getCell1XpAmount();
+        int cell2 = blockEntity.getCell2XpAmount();
+        int totalAvailable = cell1 + cell2;
+
+        if (totalAvailable < cost) {
+            return;
+        }
+
+        int remaining = cost;
+
+        int takenFromCell1 = Math.min(cell1, remaining);
+        cell1 -= takenFromCell1;
+        remaining -= takenFromCell1;
+
+        if (remaining > 0) {
+            int takenFromCell2 = Math.min(cell2, remaining);
+            cell2 -= takenFromCell2;
+            remaining -= takenFromCell2;
+        }
+
+        blockEntity.setCell1(cell1 > 0, cell1);
+        blockEntity.setCell2(cell2 > 0, cell2);
+    }
+
     @Override
     public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) {
         super.onSteppedOn(world, pos, state, entity);
 
         if (world.isClient()) return;
-
         if (!(world.getBlockEntity(pos) instanceof ExperienceGrinderBlockEntity blockEntity)) return;
-
+        if (!(entity instanceof LivingEntity living)) return;
         if (!isActive(blockEntity, world, pos)) return;
 
         if (blockEntity.getGrindTickDelay() < GRIND_TICK_MAX_DELAY) {
@@ -113,29 +174,27 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
             return;
         }
 
-        if (entity instanceof LivingEntity living) {
-            float currentHealth = living.getHealth();
-            if (currentHealth > 1.0f) {
-                living.setHealth(Math.max(1.0f, currentHealth - GRINDER_DAMAGE));
-            } else {
-                int amount = 0;
-                if (living instanceof PlayerEntity player) {
-                    amount = player.totalExperience;
-                    player.addExperience(-amount);
-                }
-
-                long remaining = fillAvailableStorageBlocks(world, pos, amount);
-                if (remaining > 0) {
-                    dropOrblockEntityez(world, pos, remaining);
-                }
-                living.kill();
+        float currentHealth = living.getHealth();
+        if (currentHealth > 1.0f) {
+            living.setHealth(Math.max(1.0f, currentHealth - GRINDER_DAMAGE));
+        } else {
+            int amount = 0;
+            if (living instanceof PlayerEntity player) {
+                amount = player.totalExperience;
+                player.addExperience(-amount);
             }
-            blockEntity.resetGrindTickDelay();
+
+            long remaining = fillAvailableStorageBlocks(world, pos, amount);
+            if (remaining > 0) {
+                dropOrbeez(world, pos, remaining);
+            }
+            living.kill();
         }
+        blockEntity.resetGrindTickDelay();
     }
 
     public long fillAvailableStorageBlocks(World world, BlockPos pos, long amount) {
-        ItemVariant orblockEntityezVariant = ItemVariant.of(ModItems.EXPERIENCE_ORBEEZ);
+        ItemVariant orbeezVariant = ItemVariant.of(ModItems.EXPERIENCE_ORBEEZ);
         long remaining = amount;
 
         for (Direction dir : Direction.values()) {
@@ -145,7 +204,7 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
             Storage<ItemVariant> storage = ItemStorage.SIDED.find(world, neighborPos, dir.getOpposite());
             if (storage == null) continue;
 
-            long freeSpace = StorageUtil.simulateInsert(storage, orblockEntityezVariant, remaining, null);
+            long freeSpace = StorageUtil.simulateInsert(storage, orbeezVariant, remaining, null);
             if (freeSpace <= 0) continue;
 
             remaining -= fillStorageBlock(storage, remaining);
@@ -157,16 +216,16 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
     public long fillStorageBlock(Storage<ItemVariant> storage, long amount) {
         if (amount <= 0) return 0;
 
-        ItemVariant orblockEntityezVariant = ItemVariant.of(ModItems.EXPERIENCE_ORBEEZ);
+        ItemVariant orbeezVariant = ItemVariant.of(ModItems.EXPERIENCE_ORBEEZ);
         long inserted;
         try (Transaction transaction = Transaction.openOuter()) {
-            inserted = storage.insert(orblockEntityezVariant, amount, transaction);
+            inserted = storage.insert(orbeezVariant, amount, transaction);
             transaction.commit();
         }
         return inserted;
     }
 
-    private void dropOrblockEntityez(World world, BlockPos pos, long amount) {
+    private void dropOrbeez(World world, BlockPos pos, long amount) {
         int maxStack = ModItems.EXPERIENCE_ORBEEZ.getDefaultStack().getMaxCount();
 
         while (amount > 0) {

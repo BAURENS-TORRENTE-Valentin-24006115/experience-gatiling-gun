@@ -36,6 +36,20 @@ public class ExperienceGrinderBlockEntity extends BlockEntity {
         markDirty();
     }
 
+    private int xpConsumeTickDelay = 0;
+
+    public int getXpConsumeTickDelay() {
+        return xpConsumeTickDelay;
+    }
+
+    public void incrementXpConsumeTickDelay() {
+        xpConsumeTickDelay++;
+    }
+
+    public void resetXpConsumeTickDelay() {
+        xpConsumeTickDelay = 0;
+    }
+
     public int getGrindTickDelay() { return grindTickDelay; }
 
     public void incrementGrindTickDelay() {
