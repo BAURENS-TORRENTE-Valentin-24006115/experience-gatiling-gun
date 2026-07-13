@@ -1,6 +1,8 @@
 package com.egg.item;
 
 import com.egg.ExperienceGatlingGun;
+import com.egg.block.ModBlocks;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -23,6 +25,12 @@ public class ModItems {
 
     public static final Item EXPERIENCE_CELLULE = register("experience_cellule",
             new ExperienceCelluleItem(new Item.Settings().maxCount(16)));
+
+    public static final Item EXPERIENCE_GRINDER = register("experience_grinder",
+            new BlockItem(ModBlocks.EXPERIENCE_GRINDER, new Item.Settings()));
+
+    public static final Item EXPERIENCE_DRAINER = register("experience_drainer",
+            new BlockItem(ModBlocks.EXPERIENCE_DRAINER, new Item.Settings()));
 
     public static void registerItems() {
         ExperienceGatlingGun.LOGGER.info("Registering items for " + ExperienceGatlingGun.MOD_ID);

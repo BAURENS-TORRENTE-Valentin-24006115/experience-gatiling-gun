@@ -29,6 +29,12 @@ public class ModBlocks {
                     .strength(5.0f, 6.0f))
     );
 
+    public static final Block EXPERIENCE_DRAINER = register("experience_drainer",
+            new ExperienceDrainerBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK)
+                    .requiresTool()
+                    .strength(5.0f, 6.0f))
+    );
+
     //public static final Block EXPERIENCE_GRINDER = register("experience_grinder",
     //        new ExperienceGrinderBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK)
     //                .strength(0.3f)

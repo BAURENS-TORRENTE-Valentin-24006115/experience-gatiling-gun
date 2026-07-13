@@ -21,6 +21,9 @@ public class ModItemGroups {
                         entries.add(new ItemStack(ModItems.EXPERIENCE_ORBEEZ));
                         entries.add(new ItemStack(ModItems.EXPERIENCE_CELLULE));
                         entries.add(new ItemStack(ModItems.EXPERIENCE_GATLING_GUN));
+
+                        entries.add(new ItemStack(ModItems.EXPERIENCE_GRINDER));
+                        entries.add(new ItemStack(ModItems.EXPERIENCE_DRAINER));
                     })
                     .build()
     );

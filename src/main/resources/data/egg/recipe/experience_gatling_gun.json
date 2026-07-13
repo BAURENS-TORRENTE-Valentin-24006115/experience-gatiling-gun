@@ -12,12 +12,12 @@
     "B": {
       "item": "minecraft:iron_block"
     },
-    "D": {
+    "I": {
       "item": "minecraft:iron_ingot"
     }
   },
   "result": {
-    "id": "egg:experience_drainer",
+    "id": "egg:experience_gatling_gun",
     "count": 1
   }
 }
