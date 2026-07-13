@@ -8,8 +8,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ClickType;
 import net.minecraft.world.World;
@@ -51,10 +49,20 @@ public class ExperienceCelluleItem extends Item{
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack cellule = player.getStackInHand(hand);
+
+        if (player.getItemCooldownManager().isCoolingDown(cellule.getItem())) {
+            return TypedActionResult.pass(cellule);
+        }
+
         Hand otherHand = (hand == Hand.MAIN_HAND) ? Hand.OFF_HAND : Hand.MAIN_HAND;
         ItemStack other = player.getStackInHand(otherHand);
 
+        if (world.isClient()) {
+            return TypedActionResult.success(cellule);
+        }
+
         if (tryFill(cellule, other, player, world)) {
+            player.getItemCooldownManager().set(cellule.getItem(), 5);
             return TypedActionResult.success(cellule);
         }
         return TypedActionResult.pass(cellule);
@@ -80,19 +88,22 @@ public class ExperienceCelluleItem extends Item{
 
         int newXp = currentXp + Math.min(xpPerUnit, spaceLeft);
 
-        ItemStack singleCellule = celluleStack.split(1);
-        setStoredXp(singleCellule, newXp);
+        if (celluleStack.getCount() == 1) {
+            setStoredXp(celluleStack, newXp);
+        } else {
+            ItemStack singleCellule = celluleStack.split(1);
+            setStoredXp(singleCellule, newXp);
 
-        if (!player.getInventory().insertStack(singleCellule)) {
-            player.dropItem(singleCellule, false);
+            if (!player.getInventory().insertStack(singleCellule)) {
+                player.dropItem(singleCellule, false);
+            }
         }
 
         if (!player.isCreative()) {
             source.decrement(1);
         }
         if (!world.isClient()) {
-            world.playSound(null, player.getBlockPos(),
-                    SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 0.6F, 1.0F);
+            ExperienceOrbeezItem.playXpSound(world, player);
         }
         return true;
     }
