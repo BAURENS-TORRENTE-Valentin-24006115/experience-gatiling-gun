@@ -14,6 +14,7 @@ public class ExperienceGrinderBlockEntity extends BlockEntity {
     private int cell1XpAmount = 0;
     private int cell2XpAmount = 0;
     private int grindTickDelay = 0;
+    private int xpConsumeAccumulator = 0;
 
     public ExperienceGrinderBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.EXPERIENCE_GRINDER, pos, state);
@@ -36,18 +37,23 @@ public class ExperienceGrinderBlockEntity extends BlockEntity {
         markDirty();
     }
 
-    private int xpConsumeTickDelay = 0;
-
-    public int getXpConsumeTickDelay() {
-        return xpConsumeTickDelay;
+    public int getXpConsumeAccumulator() {
+        return xpConsumeAccumulator;
     }
 
-    public void incrementXpConsumeTickDelay() {
-        xpConsumeTickDelay++;
+    public void addXpConsumeAccumulator(int amount) {
+        xpConsumeAccumulator += amount;
+        markDirty();
     }
 
-    public void resetXpConsumeTickDelay() {
-        xpConsumeTickDelay = 0;
+    public void decrementXpConsumeAccumulator(int amount) {
+        xpConsumeAccumulator -= amount;
+        markDirty();
+    }
+
+    public void resetXpConsumeAccumulator() {
+        xpConsumeAccumulator = 0;
+        markDirty();
     }
 
     public int getGrindTickDelay() { return grindTickDelay; }
@@ -70,6 +76,7 @@ public class ExperienceGrinderBlockEntity extends BlockEntity {
         nbt.putInt("cell1XpAmount", cell1XpAmount);
         nbt.putInt("cell2XpAmount", cell2XpAmount);
         nbt.putInt("grindTickDelay", grindTickDelay);
+        nbt.putInt("xpConsumeAccumulator", xpConsumeAccumulator);
     }
 
     @Override
@@ -80,5 +87,6 @@ public class ExperienceGrinderBlockEntity extends BlockEntity {
         cell1XpAmount = nbt.getInt("cell1XpAmount");
         cell2XpAmount = nbt.getInt("cell2XpAmount");
         grindTickDelay = nbt.getInt("grindTickDelay");
+        xpConsumeAccumulator = nbt.getInt("xpConsumeAccumulator");
     }
 }

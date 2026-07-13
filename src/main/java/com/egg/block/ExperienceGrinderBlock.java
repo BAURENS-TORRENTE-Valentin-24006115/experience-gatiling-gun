@@ -116,18 +116,20 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
 
     public static void tick(World world, BlockPos pos, BlockState state, ExperienceGrinderBlockEntity blockEntity) {
         if (!(state.getBlock() instanceof ExperienceGrinderBlock block)) return;
-        if (!block.isActive(blockEntity, world, pos)) return;
-
-        if (blockEntity.getXpConsumeTickDelay() < XP_TICK_INTERVAL) {
-            blockEntity.incrementXpConsumeTickDelay();
-            return;
-        }
+        if (block.isActive(blockEntity, world, pos)) return;
 
         boolean hasEntity = block.hasLivingEntityOnTop(world, pos);
-        int cost = hasEntity ? XP_COST_WITH_ENTITY : XP_COST_NO_ENTITY;
+        int costPerTick = hasEntity ? XP_COST_WITH_ENTITY : XP_COST_NO_ENTITY;
 
-        block.consumeXp(blockEntity, cost);
-        blockEntity.resetXpConsumeTickDelay();
+        blockEntity.addXpConsumeAccumulator(costPerTick);
+
+        while (blockEntity.getXpConsumeAccumulator() >= XP_TICK_INTERVAL) {
+            blockEntity.decrementXpConsumeAccumulator(XP_TICK_INTERVAL);
+            if (!block.consumeXp(blockEntity, 1)) {
+                blockEntity.resetXpConsumeAccumulator();
+                break;
+            }
+        }
     }
 
     private boolean hasLivingEntityOnTop(World world, BlockPos pos) {
@@ -135,13 +137,13 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
         return !world.getEntitiesByClass(LivingEntity.class, box, entity -> true).isEmpty();
     }
 
-    public void consumeXp(ExperienceGrinderBlockEntity blockEntity, int cost) {
+    public boolean consumeXp(ExperienceGrinderBlockEntity blockEntity, int cost) {
         int cell1 = blockEntity.getCell1XpAmount();
         int cell2 = blockEntity.getCell2XpAmount();
         int totalAvailable = cell1 + cell2;
 
         if (totalAvailable < cost) {
-            return;
+            return false;
         }
 
         int remaining = cost;
@@ -158,6 +160,7 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
 
         blockEntity.setCell1(cell1 > 0, cell1);
         blockEntity.setCell2(cell2 > 0, cell2);
+        return true;
     }
 
     @Override
@@ -167,7 +170,7 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
         if (world.isClient()) return;
         if (!(world.getBlockEntity(pos) instanceof ExperienceGrinderBlockEntity blockEntity)) return;
         if (!(entity instanceof LivingEntity living)) return;
-        if (!isActive(blockEntity, world, pos)) return;
+        if (isActive(blockEntity, world, pos)) return;
 
         if (blockEntity.getGrindTickDelay() < GRIND_TICK_MAX_DELAY) {
             blockEntity.incrementGrindTickDelay();
@@ -236,8 +239,8 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
     }
 
     public boolean isActive(ExperienceGrinderBlockEntity blockEntity, World world, BlockPos pos) {
-        if (xpAvailable(blockEntity) == 0) return false;
-        return world.isReceivingRedstonePower(pos);
+        if (xpAvailable(blockEntity) == 0) return true;
+        return !world.isReceivingRedstonePower(pos);
     }
 
     public int xpAvailable(ExperienceGrinderBlockEntity blockEntity) {
