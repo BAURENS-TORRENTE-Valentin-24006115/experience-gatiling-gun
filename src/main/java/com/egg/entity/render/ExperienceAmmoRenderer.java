@@ -1,7 +1,7 @@
 package com.egg.entity.render;
 
 import com.egg.entity.model.ExperienceAmmoModel;
-import com.egg.client.ExperienceGatlingGunClient;
+import com.egg.ExperienceGatlingGunClient;
 import com.egg.entity.ExperienceAmmoEntity;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;

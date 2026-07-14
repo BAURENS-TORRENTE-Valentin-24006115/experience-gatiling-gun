@@ -1,11 +1,13 @@
-package com.egg.client;
+package com.egg;
 
-import com.egg.ExperienceGatlingGun;
+import com.egg.client.ExperienceDrainerScreen;
 import com.egg.entity.model.ExperienceAmmoModel;
 import com.egg.entity.render.ExperienceAmmoRenderer;
+import com.egg.screen.ModScreenHandlers;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
@@ -19,5 +21,6 @@ public class ExperienceGatlingGunClient implements ClientModInitializer {
     public void onInitializeClient() {
         EntityModelLayerRegistry.registerModelLayer(AMMO_LAYER, ExperienceAmmoModel::getTexturedModelData);
         EntityRendererRegistry.register(ExperienceGatlingGun.EXPERIENCE_AMMO, ExperienceAmmoRenderer::new);
+        HandledScreens.register(ModScreenHandlers.EXPERIENCE_DRAINER, ExperienceDrainerScreen::new);
     }
 }

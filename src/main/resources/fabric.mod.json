@@ -19,7 +19,7 @@
 			"com.egg.ExperienceGatlingGun"
 		],
 		"client": [
-			"com.egg.client.ExperienceGatlingGunClient"
+			"com.egg.ExperienceGatlingGunClient"
 		],
 		"fabric-datagen": [
 			"com.egg.client.ExperienceGatlingGunDataGenerator"
