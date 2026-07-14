@@ -13,52 +13,48 @@ public class ExperienceDrainerScreenHandler extends ScreenHandler {
 
     private final Inventory blockInventory;
 
-    // Constructeur client (appelé automatiquement lors de l'ouverture réseau)
     public ExperienceDrainerScreenHandler(int syncId, PlayerInventory playerInv) {
-        this(syncId, playerInv, new SimpleInventory(23));
+        this(syncId, playerInv, new SimpleInventory(18));
     }
 
-    // Constructeur serveur (appelé depuis createMenu)
     public ExperienceDrainerScreenHandler(int syncId, PlayerInventory playerInv, Inventory blockInventory) {
         super(ModScreenHandlers.EXPERIENCE_DRAINER, syncId);
-        checkSize(blockInventory, 23);
+        checkSize(blockInventory, 18);
         this.blockInventory = blockInventory;
         blockInventory.onOpen(playerInv.player);
 
         // 5 slots de traitement
+        int[] procX = {44, 62, 80, 98, 116};
         for (int i = 0; i < 5; i++) {
-            this.addSlot(new Slot(blockInventory, ExperienceDrainerBlockEntity.PROCESSING_START + i, 17 + i * 18, 20));
+            this.addSlot(new Slot(blockInventory, ExperienceDrainerBlockEntity.PROCESSING_START + i, procX[i], 20));
         }
 
-        // slot d'extraction : verrouillé, le joueur ne peut PAS le retirer manuellement
-        this.addSlot(new Slot(blockInventory, ExperienceDrainerBlockEntity.EXTRACTION_SLOT, 80, 50) {
+        // slot d'extraction (verrouillé)
+        this.addSlot(new Slot(blockInventory, ExperienceDrainerBlockEntity.EXTRACTION_SLOT, 80, 52) {
             @Override
             public boolean canTakeItems(PlayerEntity player) {
-                return false; // empêche le retrait manuel, cohérent avec votre spec
+                return false;
             }
         });
 
-        // 12 slots de stockage (grille 6x2 par exemple)
+        // 12 slots de stockage (6x2)
+        int[] storX = {35, 53, 71, 89, 107, 125};
         for (int row = 0; row < 2; row++) {
             for (int col = 0; col < 6; col++) {
                 int index = ExperienceDrainerBlockEntity.STORAGE_START + row * 6 + col;
-                this.addSlot(new Slot(blockInventory, index, 17 + col * 18, 80 + row * 18));
+                this.addSlot(new Slot(blockInventory, index, storX[col], 83 + row * 18));
             }
         }
 
-        // 5 slots de cellule
-        for (int i = 0; i < 5; i++) {
-            this.addSlot(new Slot(blockInventory, ExperienceDrainerBlockEntity.CELLULE_START + i, 17 + i * 18, 120));
-        }
-
-        // Inventaire joueur (3x9 + hotbar), positions standards
+        // Inventaire joueur (3x9)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 160 + row * 18));
+                this.addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, 132 + row * 18));
             }
         }
+        // Hotbar
         for (int col = 0; col < 9; col++) {
-            this.addSlot(new Slot(playerInv, col, 8 + col * 18, 218));
+            this.addSlot(new Slot(playerInv, col, 8 + col * 18, 190));
         }
     }
 

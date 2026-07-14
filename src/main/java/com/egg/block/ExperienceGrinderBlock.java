@@ -1,7 +1,7 @@
 package com.egg.block;
 
 import com.egg.block.entity.ExperienceGrinderBlockEntity;
-import com.egg.item.ExperienceCelluleItem;
+import com.egg.block.util.CellPowerUtil;
 import com.egg.item.ModItems;
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
@@ -64,45 +64,7 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
 
         ItemStack heldItem = player.getMainHandStack();
 
-        if (heldItem.isOf(ModItems.EXPERIENCE_CELLULE)) {
-            int storedXp = ExperienceCelluleItem.getStoredXp(heldItem);
-            if (insertCell(blockEntity, storedXp)) {
-                if (!player.isCreative()) {
-                    heldItem.decrement(1);
-                }
-            }
-            return ActionResult.SUCCESS;
-        } else {
-            return removeCell(blockEntity, player) ? ActionResult.SUCCESS : ActionResult.PASS;
-        }
-    }
-
-    public boolean insertCell(ExperienceGrinderBlockEntity blockEntity, int storedXp) {
-        if (!blockEntity.isCell1Inserted()) {
-            blockEntity.setCell1(true, storedXp);
-            return true;
-        } else if (!blockEntity.isCell2Inserted()) {
-            blockEntity.setCell2(true, storedXp);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removeCell(ExperienceGrinderBlockEntity blockEntity, PlayerEntity player) {
-        if (blockEntity.isCell1Inserted()) {
-            ItemStack cellule = new ItemStack(ModItems.EXPERIENCE_CELLULE);
-            ExperienceCelluleItem.setStoredXp(cellule, blockEntity.getCell1XpAmount());
-            player.giveItemStack(cellule);
-            blockEntity.setCell1(false, 0);
-            return true;
-        } else if (blockEntity.isCell2Inserted()) {
-            ItemStack cellule = new ItemStack(ModItems.EXPERIENCE_CELLULE);
-            ExperienceCelluleItem.setStoredXp(cellule, blockEntity.getCell2XpAmount());
-            player.giveItemStack(cellule);
-            blockEntity.setCell2(false, 0);
-            return true;
-        }
-        return false;
+        return CellPowerUtil.interact(heldItem, player, blockEntity);
     }
 
     @Nullable
@@ -125,7 +87,7 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
 
         while (blockEntity.getXpConsumeAccumulator() >= XP_TICK_INTERVAL) {
             blockEntity.decrementXpConsumeAccumulator(XP_TICK_INTERVAL);
-            if (!block.consumeXp(blockEntity, 1)) {
+            if (!CellPowerUtil.consumeXp(blockEntity, 1)) {
                 blockEntity.resetXpConsumeAccumulator();
                 break;
             }
@@ -135,32 +97,6 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
     private boolean hasLivingEntityOnTop(World world, BlockPos pos) {
         Box box = new Box(pos).stretch(0, 1, 0);
         return !world.getEntitiesByClass(LivingEntity.class, box, entity -> true).isEmpty();
-    }
-
-    public boolean consumeXp(ExperienceGrinderBlockEntity blockEntity, int cost) {
-        int cell1 = blockEntity.getCell1XpAmount();
-        int cell2 = blockEntity.getCell2XpAmount();
-        int totalAvailable = cell1 + cell2;
-
-        if (totalAvailable < cost) {
-            return false;
-        }
-
-        int remaining = cost;
-
-        int takenFromCell1 = Math.min(cell1, remaining);
-        cell1 -= takenFromCell1;
-        remaining -= takenFromCell1;
-
-        if (remaining > 0) {
-            int takenFromCell2 = Math.min(cell2, remaining);
-            cell2 -= takenFromCell2;
-            remaining -= takenFromCell2;
-        }
-
-        blockEntity.setCell1(cell1 > 0, cell1);
-        blockEntity.setCell2(cell2 > 0, cell2);
-        return true;
     }
 
     @Override
@@ -244,6 +180,6 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
     }
 
     public int xpAvailable(ExperienceGrinderBlockEntity blockEntity) {
-        return blockEntity.getCell1XpAmount() + blockEntity.getCell2XpAmount();
+        return CellPowerUtil.getTotalXp(blockEntity);
     }
 }

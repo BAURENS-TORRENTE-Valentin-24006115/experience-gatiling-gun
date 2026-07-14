@@ -6,11 +6,14 @@ import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+
+import com.egg.block.util.CellPowerUtil;
 
 public class ExperienceDrainerBlock extends Block implements BlockEntityProvider {
     public ExperienceDrainerBlock(Settings settings) {
@@ -24,10 +27,20 @@ public class ExperienceDrainerBlock extends Block implements BlockEntityProvider
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!world.isClient() && world.getBlockEntity(pos) instanceof ExperienceDrainerBlockEntity drainer) {
-            player.openHandledScreen(drainer);
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        //if (world.isClient()) return ActionResult.SUCCESS;
+
+        if (!(world.getBlockEntity(pos) instanceof ExperienceDrainerBlockEntity blockEntity)) {
+            return ActionResult.PASS;
         }
-        return ActionResult.SUCCESS;
+
+        ItemStack heldItem = player.getMainHandStack();
+
+        if (player.isSneaking()) {
+            return CellPowerUtil.interact(heldItem, player, blockEntity);
+        } else {
+            player.openHandledScreen(blockEntity);
+            return ActionResult.SUCCESS;
+        }
     }
 }

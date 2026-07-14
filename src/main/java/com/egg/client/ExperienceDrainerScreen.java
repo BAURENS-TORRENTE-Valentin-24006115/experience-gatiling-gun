@@ -13,8 +13,8 @@ public class ExperienceDrainerScreen extends HandledScreen<ExperienceDrainerScre
 
     public ExperienceDrainerScreen(ExperienceDrainerScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
-        this.backgroundWidth = 176;  // à ajuster selon votre texture
-        this.backgroundHeight = 240; // idem, plus haut vu le nombre de slots
+        this.backgroundWidth = 176;
+        this.backgroundHeight = 230;
     }
 
     @Override
