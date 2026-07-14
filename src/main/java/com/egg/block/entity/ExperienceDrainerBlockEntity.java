@@ -99,7 +99,7 @@ public class ExperienceDrainerBlockEntity extends BlockEntity implements Impleme
         return true;
     }
 
-    private boolean insertOrbeez() {
+    private boolean insertOrbeezIntoStorage() {
         ItemStack orbeezSingle = new ItemStack(ModItems.EXPERIENCE_ORBEEZ, 1);
 
         for (int i = STORAGE_START; i < STORAGE_START + STORAGE_COUNT; i++) {
@@ -120,20 +120,20 @@ public class ExperienceDrainerBlockEntity extends BlockEntity implements Impleme
         return false;
     }
 
-    private boolean insertCell() {
-        ItemStack cellSingle = new ItemStack(ModItems.EXPERIENCE_CELLULE, 1);
-
+    private boolean insertCelluleIntoStorage(ItemStack cellStack) {
         for (int i = STORAGE_START; i < STORAGE_START + STORAGE_COUNT; i++) {
             ItemStack stack = inventory.get(i);
-            if (!stack.isEmpty() && stack.isOf(ModItems.EXPERIENCE_CELLULE) && stack.getCount() < stack.getMaxCount()) {
-                stack.increment(1);
+            if (!stack.isEmpty()
+                    && ItemStack.areItemsAndComponentsEqual(stack, cellStack)
+                    && stack.getCount() < stack.getMaxCount()) {
+                stack.increment(cellStack.getCount());
                 markDirty();
                 return true;
             }
         }
         for (int i = STORAGE_START; i < STORAGE_START + STORAGE_COUNT; i++) {
             if (inventory.get(i).isEmpty()) {
-                inventory.set(i, cellSingle);
+                inventory.set(i, cellStack);
                 markDirty();
                 return true;
             }
@@ -142,28 +142,39 @@ public class ExperienceDrainerBlockEntity extends BlockEntity implements Impleme
     }
 
     public void tryExtractOneOrbeez() {
-        if (inventory.get(EXTRACTION_SLOT).isEmpty()) {
-            if (!pullItemIntoExtractionSlot()) return;
-        }
-
         ItemStack extraction = inventory.get(EXTRACTION_SLOT);
-        int storedXp = ExperienceCelluleItem.getStoredXp(extraction);
-        if (storedXp <= 0) {
-            inventory.set(EXTRACTION_SLOT, ItemStack.EMPTY);
-            markDirty();
+
+        // Cellule déjà vidée mais pas encore casée en storage (place manquante
+        // au tick précédent) : on ne fait que retenter le dépôt, sans reprendre
+        // l'extraction d'xp tant qu'elle n'a pas trouvé de place.
+        if (!extraction.isEmpty() && ExperienceCelluleItem.getStoredXp(extraction) <= 0) {
+            if (insertCelluleIntoStorage(extraction)) {
+                inventory.set(EXTRACTION_SLOT, ItemStack.EMPTY);
+                markDirty();
+            }
             return;
         }
 
-        if (!insertOrbeez()) {
-            return;
+        if (extraction.isEmpty()) {
+            if (!pullItemIntoExtractionSlot()) return;
+            extraction = inventory.get(EXTRACTION_SLOT);
+        }
+
+        int storedXp = ExperienceCelluleItem.getStoredXp(extraction);
+        if (storedXp <= 0) return; // ne devrait plus jamais arriver ici désormais
+
+        if (!insertOrbeezIntoStorage()) {
+            return; // pas de place pour l'orbeez non plus : on retente au prochain tick
         }
 
         int remainingXp = storedXp - 1;
         ExperienceCelluleItem.setStoredXp(extraction, remainingXp);
         if (remainingXp <= 0) {
-            if (insertCell()) {
+            if (insertCelluleIntoStorage(extraction)) {
                 inventory.set(EXTRACTION_SLOT, ItemStack.EMPTY);
             }
+            // sinon : reste dans le slot, sera retentée au prochain tick par la
+            // branche du haut, sans jamais être supprimée silencieusement.
         }
         markDirty();
     }
