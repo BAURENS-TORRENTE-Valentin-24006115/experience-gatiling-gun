@@ -24,7 +24,7 @@ public class ExperienceAmmoModel extends EntityModel<ExperienceAmmoEntity> {
                 ModelPartBuilder.create()
                         .uv(0, 6).cuboid(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F))
                         .uv(0, 0).cuboid(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 2.0F, new Dilation(0.0F)),
-                ModelTransform.pivot(0.0F, 22.5F, 0.0F));
+                ModelTransform.pivot(0.0F, 0.0F, 0.0F));
 
         return TexturedModelData.of(modelData, 16, 16);
     }

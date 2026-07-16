@@ -48,11 +48,17 @@ public class ExperienceGatlingGunItem extends Item {
 
                         Vec3d look = player.getRotationVector();
 
-                        double spawnX = player.getX() + (look.x * 1.6);
-                        double spawnY = player.getEyeY() - 2 + (look.y * 1.2);
-                        double spawnZ = player.getZ() + (look.z * 1.6);
+                        //double spawnX = player.getX() + (look.x * 1.6);
+                        //double spawnY = player.getEyeY() - 2 + (look.y * 1.2);
+                        //double spawnZ = player.getZ() + (look.z * 1.6);
+
+                        double spawnX = player.getX();
+                        double spawnY = player.getEyeY();
+                        double spawnZ = player.getZ();
 
                         projectile.setPosition(spawnX, spawnY, spawnZ);
+
+                        //projectile.setPosition(player.getPos() + player.getHeadYaw());
 
                         projectile.setVelocity(player, player.getPitch(), player.getYaw(), 0.0F, 3.0F, 0.0F);
 
