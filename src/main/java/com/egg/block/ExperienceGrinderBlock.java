@@ -3,6 +3,7 @@ package com.egg.block;
 import com.egg.block.entity.ExperienceGrinderBlockEntity;
 import com.egg.block.util.CellPowerUtil;
 import com.egg.item.ModItems;
+import com.egg.util.ModDamageTypes;
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -18,6 +19,7 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
@@ -127,7 +129,7 @@ public class ExperienceGrinderBlock extends Block implements BlockEntityProvider
             if (remaining > 0) {
                 dropOrbeez(world, pos, remaining);
             }
-            living.kill();
+            living.damage(world.getDamageSources().create(ModDamageTypes.EXPERIENCE_GRINDER), 100000);
         }
         blockEntity.resetGrindTickDelay();
     }

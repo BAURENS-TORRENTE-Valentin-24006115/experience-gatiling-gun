@@ -1,6 +1,7 @@
 package com.egg.item;
 
 import com.egg.entity.ExperienceAmmoEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -9,18 +10,17 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class ExperienceGatlingGunItem extends Item {
 
+    public static final int MAX_USAGE_TIME = 20;
+    public int actualTime = 0;
+    public float regenPerTick = 2; // 2 is time two
+    public boolean isFiring = false;
+
     public ExperienceGatlingGunItem(Settings settings) {
         super(settings);
-    }
-
-    @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity entity) {
-        return 72000;
     }
 
     @Override
@@ -30,9 +30,27 @@ public class ExperienceGatlingGunItem extends Item {
     }
 
     @Override
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot , boolean selected) {
+        super.inventoryTick(stack, world, entity, slot, selected);
+
+        if (world.isClient()) return;
+
+        if (entity instanceof PlayerEntity player) {
+            if (player.isUsingItem()) {
+                isFiring = false;
+            }
+        }
+
+        if (actualTime > 0 && !isFiring) {
+            actualTime = Math.max(0, actualTime - (int) regenPerTick);
+        }
+    }
+
+    @Override
     public void usageTick(World world, LivingEntity livingEntity, ItemStack stack, int remainingUseTicks) {
         if (livingEntity instanceof PlayerEntity player) {
 
+            if (actualTime >= MAX_USAGE_TIME) {return;}
             int count = stack.getMaxUseTime(player) - remainingUseTicks;
             if (count % 2 == 0) {
                 boolean isCreative = player.getAbilities().creativeMode;
@@ -46,19 +64,13 @@ public class ExperienceGatlingGunItem extends Item {
                     if (!world.isClient()) {
                         ExperienceAmmoEntity projectile = new ExperienceAmmoEntity(world, player);
 
-                        Vec3d look = player.getRotationVector();
-
-                        //double spawnX = player.getX() + (look.x * 1.6);
-                        //double spawnY = player.getEyeY() - 2 + (look.y * 1.2);
-                        //double spawnZ = player.getZ() + (look.z * 1.6);
+                        //Vec3d look = player.getRotationVector();
 
                         double spawnX = player.getX();
                         double spawnY = player.getEyeY();
                         double spawnZ = player.getZ();
 
                         projectile.setPosition(spawnX, spawnY, spawnZ);
-
-                        //projectile.setPosition(player.getPos() + player.getHeadYaw());
 
                         projectile.setVelocity(player, player.getPitch(), player.getYaw(), 0.0F, 3.0F, 0.0F);
 
@@ -67,6 +79,8 @@ public class ExperienceGatlingGunItem extends Item {
                         if (!isCreative) {
                             player.addExperience(-1);
                         }
+                        actualTime++;
+                        if (!isFiring) {isFiring = true;}
                     }
                 }
             }

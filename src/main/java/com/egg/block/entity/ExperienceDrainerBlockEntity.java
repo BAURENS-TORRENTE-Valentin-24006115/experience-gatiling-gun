@@ -144,9 +144,6 @@ public class ExperienceDrainerBlockEntity extends BlockEntity implements Impleme
     public void tryExtractOneOrbeez() {
         ItemStack extraction = inventory.get(EXTRACTION_SLOT);
 
-        // Cellule déjà vidée mais pas encore casée en storage (place manquante
-        // au tick précédent) : on ne fait que retenter le dépôt, sans reprendre
-        // l'extraction d'xp tant qu'elle n'a pas trouvé de place.
         if (!extraction.isEmpty() && ExperienceCelluleItem.getStoredXp(extraction) <= 0) {
             if (insertCelluleIntoStorage(extraction)) {
                 inventory.set(EXTRACTION_SLOT, ItemStack.EMPTY);
@@ -161,10 +158,10 @@ public class ExperienceDrainerBlockEntity extends BlockEntity implements Impleme
         }
 
         int storedXp = ExperienceCelluleItem.getStoredXp(extraction);
-        if (storedXp <= 0) return; // ne devrait plus jamais arriver ici désormais
+        if (storedXp <= 0) return;
 
         if (!insertOrbeezIntoStorage()) {
-            return; // pas de place pour l'orbeez non plus : on retente au prochain tick
+            return;
         }
 
         int remainingXp = storedXp - 1;
@@ -173,8 +170,6 @@ public class ExperienceDrainerBlockEntity extends BlockEntity implements Impleme
             if (insertCelluleIntoStorage(extraction)) {
                 inventory.set(EXTRACTION_SLOT, ItemStack.EMPTY);
             }
-            // sinon : reste dans le slot, sera retentée au prochain tick par la
-            // branche du haut, sans jamais être supprimée silencieusement.
         }
         markDirty();
     }
