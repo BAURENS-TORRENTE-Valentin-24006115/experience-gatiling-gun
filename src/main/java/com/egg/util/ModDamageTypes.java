@@ -8,4 +8,7 @@ import net.minecraft.entity.damage.DamageType;
 public class ModDamageTypes {
     public static final RegistryKey<DamageType> EXPERIENCE_GRINDER =
             RegistryKey.of(RegistryKeys.DAMAGE_TYPE, Identifier.of("egg", "experience_grinder"));
+
+    public static final RegistryKey<DamageType> EXPERIENCE_AMMO =
+            RegistryKey.of(RegistryKeys.DAMAGE_TYPE, Identifier.of("egg", "experience_ammo"));
 }

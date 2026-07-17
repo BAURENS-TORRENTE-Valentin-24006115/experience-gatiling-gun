@@ -1,6 +1,7 @@
 package com.egg.entity;
 
 import com.egg.ExperienceGatlingGun;
+import com.egg.util.ModDamageTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -44,7 +45,7 @@ public class ExperienceAmmoEntity extends ThrownItemEntity {
 
         Entity target = result.getEntity();
 
-        target.damage(this.getWorld().getDamageSources().thrown(this, this.getOwner()), 4.0F);
+        target.damage(this.getWorld().getDamageSources().create(ModDamageTypes.EXPERIENCE_AMMO, this, this.getOwner()), 4);
     }
 
     @Override
