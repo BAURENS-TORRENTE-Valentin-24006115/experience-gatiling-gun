@@ -14,10 +14,13 @@ import net.minecraft.world.World;
 
 public class ExperienceGatlingGunItem extends Item {
 
-    public static final int MAX_USAGE_TIME = 20;
+    public static final int SHOOT_EVERY_X_TICK = 2;
+
+    public static final int MAX_USAGE_TIME = 400;
     public int actualTime = 0;
-    public float regenPerTick = 2; // 2 is time two
+    public static float REGEN_PER_TICK = 2; // 2 is time two
     public boolean isFiring = false;
+    public boolean canFire = true;
 
     public ExperienceGatlingGunItem(Settings settings) {
         super(settings);
@@ -30,29 +33,37 @@ public class ExperienceGatlingGunItem extends Item {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot , boolean selected) {
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, world, entity, slot, selected);
 
         if (world.isClient()) return;
 
-        if (entity instanceof PlayerEntity player) {
-            if (player.isUsingItem()) {
-                isFiring = false;
-            }
+        if (actualTime >= MAX_USAGE_TIME) {
+            canFire = false;
         }
 
-        if (actualTime > 0 && !isFiring) {
-            actualTime = Math.max(0, actualTime - (int) regenPerTick);
+        if (!isFiring && actualTime > 0) {
+            actualTime = Math.max(0, actualTime - (int) REGEN_PER_TICK);
         }
+
+        if (!canFire && actualTime <= 0) {
+            canFire = true;
+        }
+    }
+
+    @Override
+    public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        super.onStoppedUsing(stack, world, user, remainingUseTicks);
+        isFiring = false;
     }
 
     @Override
     public void usageTick(World world, LivingEntity livingEntity, ItemStack stack, int remainingUseTicks) {
         if (livingEntity instanceof PlayerEntity player) {
 
-            if (actualTime >= MAX_USAGE_TIME) {return;}
+            if (actualTime >= MAX_USAGE_TIME || !canFire) {return;}
             int count = stack.getMaxUseTime(player) - remainingUseTicks;
-            if (count % 2 == 0) {
+            if (count % SHOOT_EVERY_X_TICK == 0) {
                 boolean isCreative = player.getAbilities().creativeMode;
 
                 if (isCreative || player.totalExperience > 0) {
@@ -79,7 +90,7 @@ public class ExperienceGatlingGunItem extends Item {
                         if (!isCreative) {
                             player.addExperience(-1);
                         }
-                        actualTime++;
+                        actualTime += SHOOT_EVERY_X_TICK;
                         if (!isFiring) {isFiring = true;}
                     }
                 }
