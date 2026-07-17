@@ -1,5 +1,6 @@
 package com.egg;
 
+import com.egg.item.ExperienceGatlingGunItem;
 import com.egg.item.ExperienceOrbeezItem;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -25,6 +26,8 @@ public class ExperienceGlobalData {
             xpPerUnit = 1;
         } else if (source.isOf(Items.EXPERIENCE_BOTTLE)) {
             xpPerUnit = 3 + world.random.nextInt(5) + world.random.nextInt(5);
+        } else if (source.getItem() instanceof ExperienceGatlingGunItem){
+            xpPerUnit = -1;
         } else {
             xpPerUnit = 0;
         }

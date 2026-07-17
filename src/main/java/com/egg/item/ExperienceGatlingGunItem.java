@@ -65,8 +65,8 @@ public class ExperienceGatlingGunItem extends Item {
             int count = stack.getMaxUseTime(player) - remainingUseTicks;
             if (count % SHOOT_EVERY_X_TICK == 0) {
                 boolean isCreative = player.getAbilities().creativeMode;
-
-                if (isCreative || player.totalExperience > 0) {
+                ItemStack ammo = checkAvailableAmmo(player);
+                if (isCreative || player.totalExperience > 0 || ammo != null) {
 
                     world.playSound(null, player.getX(), player.getY(), player.getZ(),
                             SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS,
@@ -88,13 +88,48 @@ public class ExperienceGatlingGunItem extends Item {
                         world.spawnEntity(projectile);
 
                         if (!isCreative) {
-                            player.addExperience(-1);
+                            useAvailableAmmo(player, ammo);
                         }
                         actualTime += SHOOT_EVERY_X_TICK;
                         if (!isFiring) {isFiring = true;}
                     }
                 }
             }
+        }
+    }
+
+    public ItemStack checkAvailableAmmo(PlayerEntity player) {
+        ItemStack ammoStack = null;
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            ItemStack stack = player.getInventory().getStack(i);
+            Item item = stack.getItem();
+            if (item == ModItems.EXPERIENCE_CELLULE) {
+                if (ExperienceCelluleItem.getStoredXp(stack) > 0 && ExperienceCelluleItem.getStoredXp(stack) <= ExperienceCelluleItem.MAX_XP) {
+                    ammoStack = stack;
+                }
+            } else if (item == ModItems.EXPERIENCE_ORBEEZ) {
+                ammoStack = stack;
+            }
+        }
+
+        if  (ammoStack == null) {return null;}
+        if (ammoStack.getItem() == ModItems.EXPERIENCE_CELLULE) {
+            if (ExperienceCelluleItem.getStoredXp(ammoStack) <= 0) {
+                ammoStack = null;
+            }
+        }
+
+        return ammoStack;
+    }
+
+    public void useAvailableAmmo(PlayerEntity player, ItemStack ammoStack) {
+        if (ammoStack.getItem() == ModItems.EXPERIENCE_CELLULE) {
+            player.getItemCooldownManager().set(ammoStack.getItem(), 1);
+        } else if (ammoStack.getItem() == ModItems.EXPERIENCE_ORBEEZ) {
+            ammoStack.decrement(1);
+        }
+        else {
+            player.addExperience(-1);
         }
     }
 }
